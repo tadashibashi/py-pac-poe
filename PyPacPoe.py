@@ -113,9 +113,9 @@ class PyPacPoe(Game):
         move_str = input_ex("Choose your move (e.g. B3): ",
                             lambda s: s,
                             lambda s: (s[0].isalpha() and s[1:].isnumeric() and
-                                      0 <= ord(s[0]) - ord('A') < self.board.cols and
+                                      0 <= ord(s[0].upper()) - ord('A') < self.board.cols and
                                       0 < int(s[1:]) <= self.board.rows) )
-        return int(move_str[1:]) - 1, ord(move_str[0]) - ord('A')
+        return int(move_str[1:]) - 1, ord(move_str[0].upper()) - ord('A')
 
     def _state_game(self):
         self._render_board()
