@@ -39,13 +39,13 @@ class PyPacPoe:
         return sym_to_str(self.board.get(row, col))
 
     def render(self):
-        get_sym = self._get_sym
+        sym = self._get_sym
         print("   A   B   C")
-        print("1) " + get_sym(0, 0) + " | " + get_sym(0, 1) + " | " + get_sym(0, 2))
+        print("1) " + sym(0, 0) + " | " + sym(0, 1) + " | " + sym(0, 2))
         print("  -----------")
-        print("2) " + get_sym(1, 0) + " | " + get_sym(1, 1) + " | " + get_sym(1, 2))
+        print("2) " + sym(1, 0) + " | " + sym(1, 1) + " | " + sym(1, 2))
         print("  -----------")
-        print("3) " + get_sym(2, 0) + " | " + get_sym(2, 1) + " | " + get_sym(2, 2))
+        print("3) " + sym(2, 0) + " | " + sym(2, 1) + " | " + sym(2, 2))
 
     @staticmethod
     def render_title():
