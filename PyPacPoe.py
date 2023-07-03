@@ -13,16 +13,25 @@ def sym_to_str(val: int):
     else:
         return " "
 
+from enum import Enum
+
+class State(Enum):
+    Select=0
+    Game=1
+    Result=2
 
 class PyPacPoe:
     board: GameBoard
     turn: int
     computer: bool
+    state: State
 
     def __init__(self):
         self.board = GameBoard()
         self.computer = True
         self.turn = SYM_O
+        self.state = State.Select
+
 
         self.render_title()
         self.render()
@@ -31,6 +40,7 @@ class PyPacPoe:
     def reset(self):
         self.board.clear()
         self.turn = SYM_O
+        self.state = State.Select
 
     def loop(self):
         pass
