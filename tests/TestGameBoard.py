@@ -213,4 +213,34 @@ class TestGameBoard(unittest.TestCase):
         self.assertEqual(board.will_win(1), None)
         self.assertEqual(board.will_win(2), None)
 
+    def test_rate_cell0(self):
+        board = GameBoard([0, 0, 0,
+                           0, 0, 0,
+                           0, 0, 0])
+        self.assertEqual(board.rate_cell(0, 0, 1), 9)
+        self.assertEqual(board.rate_cell(1, 1, 1), 12)
+
+    def test_rate_cell1(self):
+        board = GameBoard([0, 0, 0,
+                           0, 1, 0,
+                           0, 0, 0])
+        self.assertEqual(board.rate_cell(0, 0, 1), 18)
+
+    def test_rate_cell2(self):
+        board = GameBoard([1, 0, 0,
+                           0, 0, 0,
+                           0, 0, 0])
+        self.assertEqual(board.rate_cell(1, 1, 1), 21)
+
+    def test_rate_cell3_blocked(self):
+        board = GameBoard([1, 0, 0,
+                           0, 0, 0,
+                           0, 0, 2])
+        self.assertEqual(board.rate_cell(1, 1, 1), 9)
+    def test_rate_cell4(self):
+        board = GameBoard([1, 2, 1,
+                           2, 0, 0,
+                           0, 0, 0])
+        self.assertEqual(board.rate_cell(2, 2, 1), 27)
+        self.assertEqual(board.rate_cell(1, 1, 1), 24)
 

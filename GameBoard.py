@@ -68,8 +68,88 @@ class GameBoard(Board):
         
         return won
 
+
+    def rate_cell(self, row: int, col: int, sym: int) -> int:
+        """
+        Gets the rating for a given cell position representing most optimal next play position.
+        Does not take into account blocking an opponent, make sure to check for this
+        before using this function, or compare opponent sym's optimal position to this sym's
+        Assumes a valid row and column was given.
+        Safe to call if cell is occupied–it will efficiently return 0.
+        :param row: row to check
+        :param col: column to check
+        :param sym: symbol to check with
+        :return: rating for placement at cell. Higher means greater optimization.
+        Compare with other cells for optimal play.
+        """
+        if self.get(row, col) != 0: return 0
+
+        rating = 0
+
+        # check row
+        temp = 0
+        for i in range(self.cols):
+            cur = sym if i == col else self.get(row, i)
+
+            if cur == sym:  # own piece, increase viability
+                temp = (temp + 1) * self.cols
+            elif cur != 0:  # opposing piece, bad row
+                temp = 0
+                break
+        rating += temp
+
+        # check col
+        temp = 0
+        for i in range(self.rows):
+            cur = sym if i == row else self.get(i, col)
+
+            if cur == sym:  # own piece, increase viability
+                temp = (temp + 1) * self.rows
+            elif cur != 0:  # opposing piece, bad row
+                temp = 0
+                break
+        rating += temp
+
+        # check diags
+
+        # done if board not a square
+        if self.rows != self.cols: return rating
+
+        # check if in diag top-left, bottom-right
+        if row == col:
+            temp = 0
+            for i in range(self.rows):
+                cur = sym if (i == row) else self.get(i, i)
+
+                if cur == sym:
+                    temp = (temp + 1) * self.rows
+                elif cur != 0:
+                    temp = 0
+                    break
+            rating += temp
+
+        # check if in diag bottom-left, top-right
+        if self.rows-1-row == col:
+            temp = 0
+            for i in range(self.rows):
+                cur_row = self.rows-1-i
+                cur = sym if (cur_row == row and i == col) else self.get(cur_row, i)
+
+                if cur == sym:
+                    temp = (temp + 1) * self.rows
+                elif cur != 0:
+                    temp = 0
+                    break
+            rating += temp
+
+        return rating
+
+
+
+
     def will_win(self, sym: int) -> Tuple[int, int] or None:
         if sym == 0: return None  # sym must be a player symbol
+
 
         # check rows
         for row in range(self.rows):

@@ -1,7 +1,9 @@
 import os
 import sys
 import time
-from typing import Any, Callable
+from typing import Any, Callable, Tuple
+
+import math
 
 from Game import Game
 from GameBoard import GameBoard
@@ -89,8 +91,6 @@ class PyPacPoe(Game):
                 self._state_select()
             case State.Game:
                 self._state_game()
-            case State.Result:
-                self._state_result()
             case _:
                 pass
 
@@ -104,8 +104,7 @@ class PyPacPoe(Game):
                  lambda d: d == 1 or d == 2)
         clear()
 
-        if players == 1:
-            self.computer = True
+        self.computer = players == 1
 
         self.state = State.Game
 
@@ -126,54 +125,113 @@ class PyPacPoe(Game):
 
         if self.turn == SYM_O:
             if self.computer:
-                if self.turn == SYM_O:
-                    write("thinking")
-                    flush()
+                write("thinking")
+                flush()
 
-                    for i in range(3):
-                        time.sleep(.25)
-                        write(". ")
-                        flush()
-                    time.sleep(1)
-                    write("\n")
-                    write("computer did turn!\n")
-                else:
+                c_move = self._get_computer_move()
+                self.board.set(c_move[0], c_move[1], SYM_O)
+
+                for i in range(3):
+                    time.sleep(.15)
+                    write(". ")
+                    flush()
+                time.sleep(.5)
+                write("\n")
+            else:
+                while True:
                     move = self._get_player_move()
-                    self.board.set(move[0], move[1], self.turn)
+                    if self.board.get(move[0], move[1]) == 0:
+                        break
+                    write("There is already a piece there!\n")
+
+                self.board.set(move[0], move[1], self.turn)
         else:
-            move = self._get_player_move()
+            while True:
+                move = self._get_player_move()
+
+                if self.board.get(move[0], move[1]) == 0:
+                    break
+                write("There is already a piece there!\n")
+
             self.board.set(move[0], move[1], self.turn)
 
-        if self.turn == SYM_O:
-            self.turn = SYM_X
-        else:
-            self.turn = SYM_O
-
+        self.turn = SYM_O if self.turn == SYM_X else SYM_X
         clear()
+        self._process_win()
 
 
-    def _state_result(self):
-        pass
-
-    def _get_sym(self, row: int, col: int) -> str:
+    def _get_sym_str_at(self, row: int, col: int) -> str:
         return sym_to_str(self.board.get(row, col))
 
+    @staticmethod
+    def _get_optimal(board: GameBoard, sym: int) -> Tuple[Tuple[int, int], float]:
+        """
+        Gets the next best move for a particular player
+        :param board: the board to check
+        :param sym: the symbol of the player
+        :return: tuple with the next best move at [0], and rating at [1]
+        """
+        highest = -math.inf
+        position = None
+        for row in range(board.rows):
+            for col in range(board.cols):
+                rating = board.rate_cell(row, col, sym)
+                if rating > highest:
+                    position = (row, col)
+                    highest = rating
+        return position, highest
+
     # assumes board is not full
-    def _get_computer_move(self):
-        move = None
+    def _get_computer_move(self, p_sym=SYM_X, c_sym=SYM_O) -> Tuple[int, int]:
+        """
+        Gets the computer's next move.
+        Compares against player's next move. Selects the highest rated position.
+        """
+        # get optimal positions
+        player_move = self._get_optimal(self.board, p_sym)
+        comp_move = self._get_optimal(self.board, c_sym)
 
-        # if player is going to win, block
+        return comp_move[0] if comp_move[1] >= player_move[1] else player_move[0]
+
+    def _process_win(self):
+        end_game = False
+        winner = None
+
+        if self.board.check_win(SYM_X):
+            end_game = True
+            winner = SYM_X
+        elif self.board.check_win(SYM_O):
+            end_game = True
+            winner = SYM_O
+        elif self.board.is_full():
+            end_game = True
+            winner = SYM_NONE
+
+        if end_game:
+            self._render_board()
+            write("----------------------\n")
+            if winner == SYM_NONE:
+                write("It's a cats game!\n")
+            else:
+                write("Player " + ("X" if winner == SYM_X else "O") + " is the winner!\n")
+            write("----------------------\n")
+            write("\n")
+            flush()
+            response = input_ex("Play again? y=yes, n=no: > ",
+                     lambda s: s,
+                     lambda s: s.lower() == "n" or s.lower() == "y")
+            clear()
+
+            if response.lower() == "y":
+                self.reset()
+            else:
+                self._render_exit()
+                self.quit()
 
 
-        # if opportunity to win, try
-            # find area with most connecting pieces with opportunity to win (no opponent pieces in row/col/diag)
-
-        # else
-            # place piece in first open area
-        pass
 
     def _render_board(self):
-        sym = self._get_sym
+        sym = self._get_sym_str_at
         write("   A   B   C\n")
         write("1) " + sym(0, 0) + " | " + sym(0, 1) + " | " + sym(0, 2) + "\n")
         write("  -----------\n")
