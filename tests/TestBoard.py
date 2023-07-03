@@ -52,3 +52,15 @@ class TestBoard(unittest.TestCase):
                     0, 999, 0]
         
         self.assertListEqual(board.board, expected)
+
+    def test_clear(self):
+        board = Board(3, 3, [1, 2, 3,
+                             4, 5, 6,
+                             7, 8, 9])
+        board.clear()
+
+        expected = [0, 0, 0,
+                    0, 0, 0,
+                    0, 0, 0]
+
+        self.assertListEqual(board.board, expected)

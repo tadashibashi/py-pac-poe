@@ -20,6 +20,13 @@ class Board:
         self.rows = rows
         self.cols = cols
 
+    def clear(self):
+        """
+        Set all board items to 0
+        """
+        for i in range(len(self.board)):
+            self.board[i] = 0
+
     def get(self, row: int, col: int) -> int:
         return self.board[row * self.cols + col]
     

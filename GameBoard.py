@@ -65,5 +65,3 @@ class GameBoard(Board):
                 break
         
         return won
-
-
