@@ -1,3 +1,6 @@
+from typing import Any, Callable
+
+from Game import Game
 from GameBoard import GameBoard
 
 # Constants
@@ -20,21 +23,37 @@ class State(Enum):
     Game=1
     Result=2
 
-class PyPacPoe:
+def input_ex(message: str, caster: Callable[[str], Any]):
+    did_raise = True
+    data = None
+
+    while did_raise:
+        try:
+            data = input(message)
+            data = caster(data)
+            did_raise = False
+        except Exception:
+            did_raise = True
+
+    return data
+
+
+class PyPacPoe(Game):
     board: GameBoard
     turn: int
     computer: bool
     state: State
 
-    def __init__(self):
+    def _init(self) -> bool:
         self.board = GameBoard()
         self.computer = True
         self.turn = SYM_O
         self.state = State.Select
 
+        self._render_title()
+        self._render()
 
-        self.render_title()
-        self.render()
+        return True
 
 
     def reset(self):
@@ -42,13 +61,30 @@ class PyPacPoe:
         self.turn = SYM_O
         self.state = State.Select
 
-    def loop(self):
+    def _loop(self):
+        match self.state:
+            case State.Select:
+                self._state_select()
+            case State.Game:
+                self._state_game()
+            case State.Result:
+                self._state_result()
+            case _:
+                pass
+
+    def _state_select(self):
+        pass
+
+    def _state_game(self):
+        pass
+
+    def _state_result(self):
         pass
 
     def _get_sym(self, row: int, col: int) -> str:
         return sym_to_str(self.board.get(row, col))
 
-    def render(self):
+    def _render(self):
         sym = self._get_sym
         print("   A   B   C")
         print("1) " + sym(0, 0) + " | " + sym(0, 1) + " | " + sym(0, 2))
@@ -58,7 +94,7 @@ class PyPacPoe:
         print("3) " + sym(2, 0) + " | " + sym(2, 1) + " | " + sym(2, 2))
 
     @staticmethod
-    def render_title():
+    def _render_title():
         print("----------------------")
         print("Let's play Py-Pac-Poe!")
         print("----------------------")
